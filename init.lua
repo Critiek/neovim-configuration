@@ -47,6 +47,14 @@ require("lazy").setup({
 	  end,
 	  opts = {},
 	},
+	-- LSP
+	{"VonHeikemen/lsp-zero.nvim", branch = "v3.x"},
+	{"neovim/nvim-lspconfig"},
+	{"hrsh7th/cmp-nvim-lsp"},
+	{"hrsh7th/nvim-cmp"},
+	{"L3MON4D3/LuaSnip"},
+	{"williamboman/mason-lspconfig.nvim"},
+	{"williamboman/mason.nvim"}
 })
 
 -- setting colorscheme
@@ -60,12 +68,36 @@ require"nvim-treesitter.configs".setup {
   },
 }
 
-require'mapx'.setup{ global = true }
+require"mapx".setup{ global = true }
 
 local wk = require("which-key")
 wk.register(mappings, opts)
 
-require('Comment').setup()
+require("Comment").setup()
+
+local lsp_zero = require('lsp-zero')
+
+lsp_zero.on_attach(function(client, bufnr)
+  -- see :help lsp-zero-keybindings
+  -- to learn the available actions
+  lsp_zero.default_keymaps({buffer = bufnr})
+end)
+
+-- to learn how to use mason.nvim with lsp-zero
+-- read this: https://github.com/VonHeikemen/lsp-zero.nvim/blob/v3.x/doc/md/guide/integrate-with-mason-nvim.md
+require('mason').setup({})
+require('mason-lspconfig').setup({
+  ensure_installed = {},
+  handlers = {
+    lsp_zero.default_setup,
+
+	pyright = function()
+
+      require('lspconfig').pyright.setup({
+      })
+    end,
+  },
+})
 
 -- telescope setup and configuration
 local builtin = require("telescope.builtin")
@@ -73,6 +105,13 @@ vim.keymap.set("n", "<leader>ff", builtin.find_files, {})
 vim.keymap.set("n", "<leader>fg", builtin.live_grep, {})
 vim.keymap.set("n", "<leader>fb", builtin.buffers, {})
 vim.keymap.set("n", "<leader>fh", builtin.help_tags, {})
+
+local chadtree_settings = {
+	keymap = {
+        primary = {"l"},
+    }
+}
+vim.api.nvim_set_var("chadtree_settings", chadtree_settings)
 
 nnoremap("<leader>e", ":CHADopen<Cr>", "Open CHADtree")
 nnoremap("<C-h>", "<C-W>h")
